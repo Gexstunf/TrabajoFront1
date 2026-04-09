@@ -1,0 +1,19 @@
+---
+const { receta } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Recetas App</title>
+  </head>
+</html>
+
+<div class="card" data-name={receta.strMeal}>
+  <img src={receta.strMealThumb} />
+  <h3>{receta.strMeal}</h3>
+
+  <a href={`/receta/${receta.idMeal}`}>Ver receta</a>
+
+  <button class="fav">🤍</button>
+</div>

@@ -1,0 +1,191 @@
+---
+export const prerender = false;
+
+import "../../styles/global.css";
+
+const { id } = Astro.params;
+
+const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+const data = await res.json();
+
+const receta = data.meals[0];
+
+// INGREDIENTES
+let ingredientes = [];
+for (let i = 1; i <= 20; i++) {
+  if (receta[`strIngredient${i}`]) {
+    ingredientes.push(receta[`strIngredient${i}`]);
+  }
+}
+---
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Recetas App</title>
+  </head>
+</html>
+
+<!-- HERO -->
+<div class="hero">
+  <img src={receta.strMealThumb} />
+
+  <div class="overlay">
+    <a href="/" class="back">⬅ Volver</a>
+    <h1>{receta.strMeal}</h1>
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="container">
+
+  <!-- INGREDIENTES -->
+  <div class="card">
+    <h2>🧂 Ingredientes</h2>
+
+    <div class="ingredients">
+      {ingredientes.map(i => <span>{i}</span>)}
+    </div>
+  </div>
+
+  <!-- INSTRUCCIONES -->
+  <div class="card">
+    <h2>🍴 Instrucciones</h2>
+    <p>{receta.strInstructions}</p>
+  </div>
+
+  <!-- VIDEO -->
+  {receta.strYoutube && (
+    <div class="card">
+      <h2>🎥 Video</h2>
+
+      <div class="video">
+        <iframe
+          src={`https://www.youtube.com/embed/${receta.strYoutube.split("v=")[1]}`}
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  )}
+
+</div>
+
+<style>
+/* HERO */
+.hero {
+  position: relative;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+
+/* OVERLAY */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 20px;
+  color: white;
+}
+
+.overlay h1 {
+  font-size: 2rem;
+}
+
+/* BOTON VOLVER */
+.back {
+  background: rgba(0,0,0,0.5);
+  padding: 8px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white;
+  width: fit-content;
+}
+
+/* CONTENEDOR */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* CARD */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+  animation: fadeUp 0.5s ease;
+}
+
+.card h2 {
+  margin-bottom: 10px;
+}
+
+/* INGREDIENTES */
+.ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ingredients span {
+  background: #eee;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+/* VIDEO */
+.video {
+  position: relative;
+  padding-top: 56.25%;
+}
+
+.video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 10px;
+}
+
+/* ANIMACION */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* DARK MODE */
+.dark .card {
+  background: #1e1e1e;
+}
+
+.dark .ingredients span {
+  background: #333;
+}
+</style>

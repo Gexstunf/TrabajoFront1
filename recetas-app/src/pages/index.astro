@@ -1,17 +1,103 @@
 ---
+import "../styles/global.css";
+import RecipeCard from "../components/RecipeCard.astro";
 
+const res = await fetch("https://www.themealdb.com/api/json/v1/1/search.php?s=");
+const data = await res.json();
+const recetas = data.meals || [];
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Recetas App</title>
+  </head>
 </html>
+
+<nav>
+  <div>
+    <a href="/">Inicio</a>
+    <a href="/favoritos">Favoritos</a>
+  </div>
+  <button id="toggle">🌙</button>
+</nav>
+
+<h1>Recetas</h1>
+
+<input id="buscador" placeholder="Buscar receta..." />
+
+<div class="filters">
+  <button data-filter="Chicken">Pollo</button>
+  <button data-filter="Beef">Carne</button>
+  <button data-filter="Dessert">Postres</button>
+  <button data-filter="all">Todas</button>
+</div>
+
+<div id="loader" class="loader">Cargando recetas...</div>
+
+<div class="grid" id="grid" style="display:none;">
+  {recetas.map(r => <RecipeCard receta={r} />)}
+</div>
+
+<p id="empty" style="display:none;">No se encontraron recetas 😢</p>
+
+<script>
+const grid = document.getElementById("grid");
+const loader = document.getElementById("loader");
+const input = document.getElementById("buscador");
+const empty = document.getElementById("empty");
+
+window.onload = () => {
+  loader.style.display = "none";
+  grid.style.display = "grid";
+};
+
+// BUSCADOR
+input.addEventListener("input", () => {
+  const texto = input.value.toLowerCase();
+  let visible = 0;
+
+  document.querySelectorAll(".card").forEach(card => {
+    if (card.dataset.name.toLowerCase().includes(texto)) {
+      card.style.display = "block";
+      visible++;
+    } else {
+      card.style.display = "none";
+    }
+  });
+
+  empty.style.display = visible ? "none" : "block";
+});
+
+// FAVORITOS
+let favs = JSON.parse(localStorage.getItem("fav")) || [];
+
+document.querySelectorAll(".fav").forEach(btn => {
+  const name = btn.parentElement.dataset.name;
+
+  if (favs.includes(name)) btn.textContent = "❤️";
+
+  btn.onclick = () => {
+    if (favs.includes(name)) {
+      favs = favs.filter(f => f !== name);
+      btn.textContent = "🤍";
+    } else {
+      favs.push(name);
+      btn.textContent = "❤️";
+    }
+    localStorage.setItem("fav", JSON.stringify(favs));
+  };
+});
+
+// DARK MODE
+const btn = document.getElementById("toggle");
+const theme = localStorage.getItem("theme");
+
+if (theme === "dark") document.body.classList.add("dark");
+
+btn.onclick = () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+};
+</script>
